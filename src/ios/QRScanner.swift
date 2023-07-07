@@ -50,6 +50,7 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
     }
 
     var cameraView: CameraView!
+    var iciciDesignView: UIView = UIView()
     var captureSession:AVCaptureSession?
     var captureVideoPreviewLayer:AVCaptureVideoPreviewLayer?
     var metaOutput: AVCaptureMetadataOutput?
@@ -289,15 +290,199 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
         }
     }
 
+    private func setQRUI() {
+        iciciDesignView = UIView(frame: CGRect(x: 0, y: 0, width: 350, height: 650))
+        iciciDesignView.backgroundColor = .clear
+        iciciDesignView.tag = 1102
+        iciciDesignView.translatesAutoresizingMaskIntoConstraints = false
+        self.webView?.addSubview(iciciDesignView)
+        
+        let header = UIView(frame: CGRect(x: 0, y: 0, width: 350, height: 55))
+        header.backgroundColor = .white
+        header.translatesAutoresizingMaskIntoConstraints = false
+        iciciDesignView.addSubview(header)
+        
+        let headerTitle = UILabel(frame: CGRect(x: 90, y: 10, width: 30, height: 30))
+        headerTitle.text = "Digital Token"
+        headerTitle.textColor = .black
+        headerTitle.textAlignment = .left
+        headerTitle.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        headerTitle.translatesAutoresizingMaskIntoConstraints = false
+        header.addSubview(headerTitle)
+        
+        let back = UIButton()
+        back.backgroundColor = UIColor(red: 255/255, green: 251/255, blue: 248/255, alpha: 1)
+        if #available(iOS 13.0, *) {
+            back.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+            back.tintColor = UIColor(red: 251/255, green: 121/255, blue: 25/255, alpha: 1)
+            back.layer.cornerRadius = 10
+            back.layer.borderWidth = 0.5
+            back.layer.borderColor = UIColor(red: 251/255, green: 121/255, blue: 25/255, alpha: 1).cgColor
+        } else {
+            // Fallback on earlier versions
+        }
+        back.addTarget(self, action: #selector(back_click), for: .touchUpInside)
+        back.translatesAutoresizingMaskIntoConstraints = false
+        header.addSubview(back)
+        
+        let body = UIView(frame: CGRect(x: 0, y: 60, width: 350, height: 550))
+        body.backgroundColor = .clear
+        body.translatesAutoresizingMaskIntoConstraints = false
+        iciciDesignView.addSubview(body)
+        
+        let view1 = UIView()
+        view1.backgroundColor = .red
+        let view2 = UIView()
+        view2.backgroundColor = .green
+        let view3 = UIView()
+        view3.backgroundColor = .blue
+        let view4 = UIView()
+        view4.backgroundColor = .purple
+        
+        let viewScan = UIView()
+        viewScan.translatesAutoresizingMaskIntoConstraints = false
+        viewScan.backgroundColor = .clear
+        body.addSubview(viewScan)
+        let viewScanHeight = self.webView.frame.width / 2
+        
+        for view in [view1, view2, view3, view4] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+            body.addSubview(view)
+        }
+        
+        
+        let imageCorner = UIImageView()
+        imageCorner.translatesAutoresizingMaskIntoConstraints = false
+        body.addSubview(imageCorner)
+        let assetURL = Bundle.main.bundleURL.appendingPathComponent("www/qr_border.png")
+        if let data = NSData(contentsOf: assetURL),
+           let image = UIImage(data: data as Data){
+            imageCorner.image = image
+        }
+        
+        let title = UILabel()
+        title.text = "Scan your QR Code"
+        title.textColor = .white
+        title.textAlignment = .center
+        title.font = UIFont.preferredFont(forTextStyle: .title1)
+        title.translatesAutoresizingMaskIntoConstraints = false
+        view1.addSubview(title)
+        
+        let disciption = UILabel()
+        disciption.text = "The QR Code will be detected automatically once you have positioned the code within the guide lines"
+        disciption.textColor = .white
+        disciption.textAlignment = .center
+        disciption.numberOfLines = 0
+        disciption.font = UIFont.preferredFont(forTextStyle: .callout)
+        disciption.translatesAutoresizingMaskIntoConstraints = false
+        view4.addSubview(disciption)
+        
+        NSLayoutConstraint.activate([
+            iciciDesignView.topAnchor.constraint(equalTo: self.webView.topAnchor, constant: 0),
+            iciciDesignView.leadingAnchor.constraint(equalTo: self.webView.leadingAnchor, constant: 0),
+            iciciDesignView.trailingAnchor.constraint(equalTo: self.webView.trailingAnchor, constant: 0),
+            iciciDesignView.bottomAnchor.constraint(equalTo: self.webView.bottomAnchor, constant: 0),
+            
+            header.topAnchor.constraint(equalTo: iciciDesignView.topAnchor, constant: 0),
+            header.leadingAnchor.constraint(equalTo: iciciDesignView.leadingAnchor, constant: 0),
+            header.trailingAnchor.constraint(equalTo: iciciDesignView.trailingAnchor, constant: 0),
+            
+            body.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 0),
+            body.leadingAnchor.constraint(equalTo: iciciDesignView.leadingAnchor, constant: 0),
+            body.trailingAnchor.constraint(equalTo: iciciDesignView.trailingAnchor, constant: 0),
+            body.bottomAnchor.constraint(equalTo: iciciDesignView.bottomAnchor, constant: 0),
+        ])
+        
+        NSLayoutConstraint.activate([
+            back.topAnchor.constraint(equalTo: iciciDesignView.safeAreaLayoutGuide.topAnchor, constant: 10),
+            back.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 25),
+            back.bottomAnchor.constraint(equalTo: header.bottomAnchor, constant: -20),
+            back.heightAnchor.constraint(equalToConstant: 35),
+            back.widthAnchor.constraint(equalTo: back.heightAnchor,constant: 0),
+            
+            headerTitle.leadingAnchor.constraint(equalTo: back.trailingAnchor, constant: 15),
+            headerTitle.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -15),
+            headerTitle.centerYAnchor.constraint(equalTo: back.centerYAnchor, constant: 0),
+            
+            ])
+        
+        
+        NSLayoutConstraint.activate([
+            view1.topAnchor.constraint(equalTo: body.topAnchor, constant: 0),
+            view1.leadingAnchor.constraint(equalTo: body.leadingAnchor, constant: 0),
+            view1.trailingAnchor.constraint(equalTo: body.trailingAnchor, constant: 0),
+            view1.heightAnchor.constraint(equalToConstant: viewScanHeight - 40),
+            
+            viewScan.topAnchor.constraint(equalTo: view1.bottomAnchor, constant: 0),
+            viewScan.heightAnchor.constraint(equalToConstant: viewScanHeight),
+            viewScan.widthAnchor.constraint(equalToConstant: viewScanHeight),
+            viewScan.centerXAnchor.constraint(equalTo: body.centerXAnchor, constant: 0),
+            
+            imageCorner.topAnchor.constraint(equalTo: viewScan.topAnchor, constant: -5),
+            imageCorner.leadingAnchor.constraint(equalTo: viewScan.leadingAnchor, constant: -5),
+            imageCorner.trailingAnchor.constraint(equalTo: viewScan.trailingAnchor, constant: 5),
+            imageCorner.bottomAnchor.constraint(equalTo: viewScan.bottomAnchor, constant: 5),
+            
+            view2.topAnchor.constraint(equalTo: viewScan.topAnchor, constant: 0),
+            view2.leadingAnchor.constraint(equalTo: view1.leadingAnchor, constant: 0),
+            view2.trailingAnchor.constraint(equalTo: viewScan.leadingAnchor, constant: 0),
+            view2.bottomAnchor.constraint(equalTo: viewScan.bottomAnchor, constant: 0),
+//
+            view3.topAnchor.constraint(equalTo: viewScan.topAnchor, constant: 0),
+            view3.leadingAnchor.constraint(equalTo: viewScan.trailingAnchor, constant: 0),
+            view3.trailingAnchor.constraint(equalTo: view1.trailingAnchor, constant: 0),
+            view3.bottomAnchor.constraint(equalTo: viewScan.bottomAnchor, constant: 0),
+            
+            view4.topAnchor.constraint(equalTo: viewScan.bottomAnchor, constant: 0),
+            view4.leadingAnchor.constraint(equalTo: view1.leadingAnchor, constant: 0),
+            view4.trailingAnchor.constraint(equalTo: view1.trailingAnchor, constant: 0),
+            view4.bottomAnchor.constraint(equalTo: body.bottomAnchor, constant: 0),
+            
+            ])
+        
+        NSLayoutConstraint.activate([
+            title.leadingAnchor.constraint(equalTo: view1.leadingAnchor, constant: 35),
+            title.bottomAnchor.constraint(equalTo: view1.bottomAnchor, constant: -35),
+            title.centerXAnchor.constraint(equalTo: view1.centerXAnchor, constant: 0),
+
+            disciption.topAnchor.constraint(equalTo: view4.topAnchor, constant: 35),
+            disciption.leadingAnchor.constraint(equalTo: view4.leadingAnchor, constant: 35),
+            disciption.centerXAnchor.constraint(equalTo: view4.centerXAnchor, constant: 0),
+            ])
+        DispatchQueue.main.async {
+            self.cameraView.frame = body.frame
+            self.cameraView.translatesAutoresizingMaskIntoConstraints = false
+            
+            NSLayoutConstraint.activate([
+                self.cameraView.topAnchor.constraint(equalTo: body.topAnchor, constant: 0),
+                self.cameraView.leadingAnchor.constraint(equalTo: body.leadingAnchor, constant: 0),
+                self.cameraView.trailingAnchor.constraint(equalTo: body.trailingAnchor, constant: 0),
+                self.cameraView.bottomAnchor.constraint(equalTo: body.bottomAnchor, constant: 0),
+                ])
+        }
+        
+    }
+    @objc private func back_click() {
+        self.makeOpaque()
+        self.cameraView.removeFromSuperview()
+        self.iciciDesignView.removeFromSuperview()
+    }
+
     @objc func show(_ command: CDVInvokedUrlCommand) {
         self.webView?.isOpaque = false
         self.webView?.backgroundColor = UIColor.clear
         self.getStatus(command)
+        self.cameraView.frame = self.webView.bounds
+        self.webView?.addSubview(self.cameraView)
+        self.setQRUI()
     }
 
     @objc func hide(_ command: CDVInvokedUrlCommand) {
         self.makeOpaque()
         self.getStatus(command)
+        self.cameraView.removeFromSuperview()
+        self.iciciDesignView.removeFromSuperview()
     }
 
     @objc func pausePreview(_ command: CDVInvokedUrlCommand) {
